@@ -71,7 +71,7 @@ const FillingDoneCodec = new ConstantCodec('order-cake-fillings-done')
 
 export const OrderCakeFillingsView = new View<
   CustomContext,
-  { dough: Dough, fillings: Filling[] },
+  { dough: Dough },
   { fillings: Filling[] }
 >(
   'order-cake-fillings',
