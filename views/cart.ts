@@ -1,5 +1,5 @@
 import { Codec, ConstantCodec } from "../lib/codec";
-import { View } from "grammy-views";
+import { createView, View } from "grammy-views";
 import { CustomContext } from "../types/context";
 import { answer } from "../utils/answer";
 import { goToMainMenu } from "./main";
@@ -27,12 +27,9 @@ const sliceBack = <T>(items: T[], start: number, end: number): T[] => {
 
 const ITEMS_PER_PAGE = 3
 
-export const CartView = new View<CustomContext, { page: number }, { page: number }>(
-  'cart',
-  () => ({ page: 0 }),
-)
+export const CartView = createView<CustomContext, { page: number }>('cart').setDefaultState(() => ({ page: 0 }))
 CartView.global.filter(CartPageCodec.filter, (ctx) => ctx.view.enter(CartView, { page: ctx.codec }))
-CartView.global.filter(CartCodec.filter, (ctx) => ctx.view.enter(CartView, { page: 0 }))
+CartView.global.filter(CartCodec.filter, (ctx) => ctx.view.enter(CartView))
 
 CartView.render((ctx) => {
   const pageNumber = ctx.view.state.page
@@ -90,7 +87,7 @@ const CartItemCodec = new Codec<number>({
 })
 const goToItem = (id: number) => CartItemCodec.encode(id)
 
-export const CartItemView = new View<CustomContext, { id: number }>('cart-item')
+export const CartItemView = createView<CustomContext, { id: number }>('cart-item')
 CartItemView.global.filter(CartItemCodec.filter, (ctx) => ctx.view.enter(CartItemView, { id: ctx.codec }))
 
 CartItemView.render((ctx) => {

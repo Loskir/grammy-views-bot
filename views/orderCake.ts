@@ -1,5 +1,5 @@
 import { Codec, ConstantCodec } from "../lib/codec";
-import { View } from "grammy-views";
+import { createView } from "grammy-views";
 import { Dough, Filling } from "../types/cake";
 import { CustomContext } from "../types/context";
 import { answer } from "../utils/answer";
@@ -26,7 +26,7 @@ const DoughCodec = new Codec<Dough>({
   },
 })
 
-export const OrderCakeDoughView = new View<CustomContext>('order-cake-dough')
+export const OrderCakeDoughView = createView<CustomContext>('order-cake-dough')
 OrderCakeDoughView.global.filter(OrderCakeCodec.filter, (ctx) => ctx.view.enter(OrderCakeDoughView))
 OrderCakeDoughView.render((ctx) => {
   return answer(ctx)(`Welcome to the order screen!
@@ -69,14 +69,10 @@ const FillingCodec = new Codec<Filling>({
 
 const FillingDoneCodec = new ConstantCodec('order-cake-fillings-done')
 
-export const OrderCakeFillingsView = new View<
+export const OrderCakeFillingsView = createView<
   CustomContext,
-  { dough: Dough },
-  { fillings: Filling[] }
->(
-  'order-cake-fillings',
-  () => ({ fillings: [] }),
-)
+  { dough: Dough, fillings: Filling[] }
+>('order-cake-fillings').setDefaultState(() => ({ fillings: [] }))
 OrderCakeFillingsView.render((ctx) => {
   const keyboard = [
     ...Object.values(Filling).map((v) => [{
@@ -131,7 +127,7 @@ OrderCakeFillingsView.filter(FillingDoneCodec.filter, (ctx) => {
 const OrderCakeCommentBackCodec = new ConstantCodec('order-cake-comment-back')
 const OrderCakeCommentSkipCodec = new ConstantCodec('order-cake-comment-skip')
 
-export const OrderCakeCommentView = new View<
+export const OrderCakeCommentView = createView<
   CustomContext,
   { dough: Dough, fillings: Filling[], comment?: string }
 >('order-cake-comment')
@@ -169,7 +165,7 @@ OrderCakeCommentView.on(':text', (ctx) => {
 const OrderCakeConfirmCodec = new ConstantCodec('order-cake-confirm-confirm')
 const OrderCakeConfirmBackCodec = new ConstantCodec('order-cake-confirm-back')
 
-export const OrderCakeConfirmView = new View<
+export const OrderCakeConfirmView = createView<
   CustomContext,
   { dough: Dough, fillings: Filling[], comment?: string }
 >('order-cake-confirm')
@@ -180,7 +176,7 @@ Comment: ${ctx.view.state.comment ? `<b>${ctx.view.state.comment}</b>` : '<i>No 
     parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
-        [{text: 'Confirm', callback_data: OrderCakeConfirmCodec.encode()}],
+        [{ text: 'Confirm', callback_data: OrderCakeConfirmCodec.encode() }],
         [{ text: '‹ Change comment', callback_data: OrderCakeConfirmBackCodec.encode() }],
       ]
     }
