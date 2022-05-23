@@ -1,10 +1,10 @@
-import { View } from 'grammy-views'
+import { createView } from 'grammy-views'
 import { CustomContext } from '../types/context'
 import { ConstantCodec } from '../lib/codec'
 import { goToOrderCake } from './orderCake'
 import { goToCart } from './cart'
 
-export const MainView = new View<CustomContext>('main')
+export const MainView = createView<CustomContext>('main')
 MainView.render((ctx) => {
   const answer = (...args: Parameters<typeof ctx['editMessageText']>) => ctx.callbackQuery ? ctx.editMessageText(...args) : ctx.reply(...args)
   return answer('Welcome to grammY bakery!', {
