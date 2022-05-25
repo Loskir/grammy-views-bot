@@ -27,7 +27,7 @@ const DoughCodec = new Codec<Dough>({
 })
 
 export const OrderCakeDoughView = createView<CustomContext>('order-cake-dough')
-OrderCakeDoughView.global.filter(OrderCakeCodec.filter, (ctx) => ctx.view.enter(OrderCakeDoughView))
+OrderCakeDoughView.global.filter(OrderCakeCodec.filter, (ctx) => OrderCakeDoughView.enter(ctx))
 OrderCakeDoughView.render((ctx) => {
   return answer(ctx)(`Welcome to the order screen!
 First, choose what kind of <b>dough</b> to use for the cake.
@@ -48,7 +48,7 @@ Type /cancel at any time to return to the main screen.`, {
     },
   })
 })
-OrderCakeDoughView.filter(DoughCodec.filter, (ctx) => ctx.view.enter(OrderCakeFillingsView, { dough: ctx.codec }))
+OrderCakeDoughView.filter(DoughCodec.filter, (ctx) => OrderCakeFillingsView.enter(ctx, { dough: ctx.codec }))
 
 const FillingCodec = new Codec<Filling>({
   encode(data) {
@@ -118,7 +118,7 @@ OrderCakeFillingsView.filter(FillingDoneCodec.filter, (ctx) => {
       text: 'Select at least one filling',
     })
   }
-  return ctx.view.enter(OrderCakeCommentView, {
+  return OrderCakeCommentView.enter(ctx, {
     dough: ctx.view.state.dough,
     fillings: ctx.view.state.fillings,
   })
@@ -146,16 +146,16 @@ Now you can leave a comment to our chefs, if you want.`, {
     }
   })
 })
-OrderCakeCommentView.filter(OrderCakeCommentBackCodec.filter, (ctx) => ctx.view.enter(OrderCakeFillingsView, {
+OrderCakeCommentView.filter(OrderCakeCommentBackCodec.filter, (ctx) => OrderCakeFillingsView.enter(ctx, {
   dough: ctx.view.state.dough,
   fillings: ctx.view.state.fillings,
 }))
-OrderCakeCommentView.filter(OrderCakeCommentSkipCodec.filter, (ctx) => ctx.view.enter(OrderCakeConfirmView, {
+OrderCakeCommentView.filter(OrderCakeCommentSkipCodec.filter, (ctx) => OrderCakeConfirmView.enter(ctx, {
   dough: ctx.view.state.dough,
   fillings: ctx.view.state.fillings,
 }))
 OrderCakeCommentView.on(':text', (ctx) => {
-  return ctx.view.enter(OrderCakeConfirmView, {
+  return OrderCakeConfirmView.enter(ctx, {
     dough: ctx.view.state.dough,
     fillings: ctx.view.state.fillings,
     comment: ctx.msg.text,
@@ -182,7 +182,7 @@ Comment: ${ctx.view.state.comment ? `<b>${ctx.view.state.comment}</b>` : '<i>No 
     }
   })
 })
-OrderCakeConfirmView.filter(OrderCakeConfirmBackCodec.filter, (ctx) => ctx.view.enter(OrderCakeCommentView, {
+OrderCakeConfirmView.filter(OrderCakeConfirmBackCodec.filter, (ctx) => OrderCakeCommentView.enter(ctx, {
   dough: ctx.view.state.dough,
   fillings: ctx.view.state.fillings,
 }))
@@ -196,5 +196,5 @@ OrderCakeConfirmView.filter(OrderCakeConfirmCodec.filter, (ctx) => {
   ctx.answerCallbackQuery({
     text: 'Your cake is ordered!'
   })
-  return ctx.view.enter(MainView)
+  return MainView.enter(ctx)
 })

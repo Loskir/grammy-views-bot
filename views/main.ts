@@ -23,9 +23,9 @@ MainView.render((ctx) => {
     },
   })
 })
-MainView.global.command(['start', 'cancel'], (ctx) => ctx.view.enter(MainView))
+MainView.global.command(['start', 'cancel'], (ctx) => MainView.enter(ctx))
 
 export const MainMenuCodec = new ConstantCodec('main-menu')
 export const goToMainMenu = () => MainMenuCodec.encode()
 
-MainView.global.filter(MainMenuCodec.filter, (ctx) => ctx.view.enter(MainView))
+MainView.global.filter(MainMenuCodec.filter, (ctx) => MainView.enter(ctx))

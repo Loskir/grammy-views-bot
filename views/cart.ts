@@ -28,8 +28,8 @@ const sliceBack = <T>(items: T[], start: number, end: number): T[] => {
 const ITEMS_PER_PAGE = 3
 
 export const CartView = createView<CustomContext, { page: number }>('cart').setDefaultState(() => ({ page: 0 }))
-CartView.global.filter(CartPageCodec.filter, (ctx) => ctx.view.enter(CartView, { page: ctx.codec }))
-CartView.global.filter(CartCodec.filter, (ctx) => ctx.view.enter(CartView))
+CartView.global.filter(CartPageCodec.filter, (ctx) => CartView.enter(ctx, { page: ctx.codec }))
+CartView.global.filter(CartCodec.filter, (ctx) => CartView.enter(ctx))
 
 CartView.render((ctx) => {
   const pageNumber = ctx.view.state.page
@@ -61,7 +61,7 @@ CartView.render((ctx) => {
       inline_keyboard: [
         ...itemsEntries.map(([i, item]) => [{
           text: item.created_at.toString(),
-          callback_data: goToItem(i),
+          callback_data: goToItem(i, ctx.view.state.page),
         }]),
         paginationRow,
         [{
@@ -73,28 +73,31 @@ CartView.render((ctx) => {
   })
 })
 
-const CartItemCodec = new Codec<number>({
-  encode(id) {
-    return `cart-item-${id}`
+const CartItemCodec = new Codec<{ id: number, backToPage: number }>({
+  encode({ id, backToPage }) {
+    return `cart-item-${id}-${backToPage}`
   },
   decode(s) {
-    const match = s.match(/^cart-item-(\d+)$/)
+    const match = s.match(/^cart-item-(\d+)-(\d+)$/)
     if (!match) {
       return null
     }
-    return Number(match[1])
+    return {
+      id: Number(match[1]),
+      backToPage: Number(match[2]),
+    }
   },
 })
-const goToItem = (id: number) => CartItemCodec.encode(id)
+const goToItem = (id: number, backToPage: number) => CartItemCodec.encode({ id, backToPage })
 
-export const CartItemView = createView<CustomContext, { id: number }>('cart-item')
-CartItemView.global.filter(CartItemCodec.filter, (ctx) => ctx.view.enter(CartItemView, { id: ctx.codec }))
+export const CartItemView = createView<CustomContext, { id: number, backToPage?: number }>('cart-item')
+CartItemView.global.filter(CartItemCodec.filter, (ctx) => CartItemView.enter(ctx, ctx.codec))
 
 CartItemView.render((ctx) => {
   const item = ctx.session.cart[ctx.view.state.id]
   if (!item) {
     ctx.answerCallbackQuery({ text: 'Order not found :(' })
-    return ctx.view.revert()
+    return CartView.enter(ctx)
   }
   return answer(ctx)(`Order #${ctx.view.state.id}
   
@@ -106,7 +109,7 @@ Created at: ${item.created_at}`, {
     parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
-        [{text: '‹ Back', callback_data: goToCart()}],
+        [{ text: '‹ Back', callback_data: goToCart() }],
       ],
     },
   })
