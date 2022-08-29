@@ -1,12 +1,11 @@
 import { Bot, session } from 'grammy'
+import { FileAdapter } from '@grammyjs/storage-file'
+import { ViewController } from '@loskir/grammy-views'
 
 import { config } from './core/config'
 import { CustomContext } from './types/context'
-
 import callbackQuery from './passThruMiddlewares/callbackQuery'
-import { ViewController } from 'grammy-views'
 import { MainView } from './views/main'
-import { FileAdapter } from '@grammyjs/storage-file'
 import { OrderCakeCommentView, OrderCakeConfirmView, OrderCakeDoughView, OrderCakeFillingsView } from './views/orderCake'
 import { CartItemView, CartView } from './views/cart'
 
@@ -16,7 +15,6 @@ export function getBot() {
   bot.use(callbackQuery)
   bot.use(session({
     initial: () => ({
-      __views: { current: '', state: {} },
       cart: [],
     }),
     storage: new FileAdapter({ dirName: 'sessions' }),

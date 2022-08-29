@@ -1,5 +1,5 @@
+import { createView } from "@loskir/grammy-views";
 import { Codec, ConstantCodec } from "../lib/codec";
-import { createView } from "grammy-views";
 import { CustomContext } from "../types/context";
 import { answer } from "../utils/answer";
 import { goToMainMenu } from "./main";

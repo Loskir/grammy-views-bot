@@ -1,4 +1,4 @@
-import { createView } from 'grammy-views'
+import { createView } from '@loskir/grammy-views'
 import { CustomContext } from '../types/context'
 import { ConstantCodec } from '../lib/codec'
 import { goToOrderCake } from './orderCake'
